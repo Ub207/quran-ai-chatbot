@@ -1,6 +1,11 @@
 """
 prepare_data.py — Downloads Quran data from CDN and builds FAISS vector index.
 Run this script ONCE before launching the Streamlit app.
+
+Data sources:
+  Arabic  — quran-json CDN (original text)
+  English — quran-json CDN (Saheeh International)
+  Urdu    — fawazahmed0/quran-api (Maulana Fateh Muhammad Jalandhri, Deobandi)
 """
 
 import os
@@ -21,8 +26,10 @@ if hasattr(sys.stdout, "reconfigure"):
 # ── CDN URLs ──────────────────────────────────────────────────────────────────
 URLS = {
     "arabic":  "https://cdn.jsdelivr.net/npm/quran-json@3.1.2/dist/quran.json",
-    "urdu":    "https://cdn.jsdelivr.net/npm/quran-json@3.1.2/dist/quran_ur.json",
     "english": "https://cdn.jsdelivr.net/npm/quran-json@3.1.2/dist/quran_en.json",
+    # Maulana Fateh Muhammad Jalandhri (Deobandi) via fawazahmed0/quran-api
+    # Format differs from quran-json: root key "chapter", verses use "text" not "translation"
+    "urdu":    "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/urd-fatehmuhammadja.json",
 }
 
 DATA_DIR   = Path("quran_data")
@@ -55,14 +62,24 @@ def fetch_json(url: str, retries: int = 3, delay: float = 2.0) -> dict | list:
 
 # ── Step 1: Download ──────────────────────────────────────────────────────────
 
-def download_data() -> tuple[list, list, list]:
+def download_data() -> tuple[list, dict, list]:
+    """Download Arabic (list), Urdu (dict, fawazahmed0 format), and English (list)."""
     print("\n📥 Step 1: Downloading Quran data …")
     arabic_data  = fetch_json(URLS["arabic"])
-    print("   ✅ Arabic JSON downloaded")
+    print("   ✅ Arabic JSON downloaded (quran-json format)")
     urdu_data    = fetch_json(URLS["urdu"])
-    print("   ✅ Urdu JSON downloaded")
+    print("   ✅ Urdu JSON downloaded (fawazahmed0 format — Fateh Muhammad Jalandhri)")
     english_data = fetch_json(URLS["english"])
-    print("   ✅ English JSON downloaded")
+    print("   ✅ English JSON downloaded (quran-json format)")
+
+    # Validate fawazahmed0 structure early for a clear error message
+    # Actual structure: {"quran": [{"chapter": N, "verse": N, "text": "..."}, ...]}
+    if not isinstance(urdu_data, dict) or "quran" not in urdu_data:
+        raise RuntimeError(
+            "Unexpected Urdu JSON structure from fawazahmed0 API. "
+            f"Expected dict with 'quran' key, got keys: {list(urdu_data.keys()) if isinstance(urdu_data, dict) else type(urdu_data)}"
+        )
+
     return arabic_data, urdu_data, english_data
 
 
@@ -70,17 +87,28 @@ def download_data() -> tuple[list, list, list]:
 
 def combine_data(
     arabic_data: list,
-    urdu_data: list,
+    urdu_data: dict,
     english_data: list,
 ) -> list[dict]:
-    """Merge all three datasets into one list of verse records."""
+    """Merge all three datasets into one list of verse records.
+
+    Arabic + English use quran-json format (list of surahs, verses[].translation).
+    Urdu uses fawazahmed0 format: {"quran": [{"chapter": N, "verse": N, "text": "..."}, ...]}
+    — a flat list of all 6236 verses indexed by (chapter, verse) tuple.
+    """
     print("\n🔀 Step 2: Combining data …")
     DATA_DIR.mkdir(exist_ok=True)
+
+    # Build a (chapter, verse) → text lookup from the flat fawazahmed0 list
+    urdu_lookup: dict[tuple[int, int], str] = {
+        (v["chapter"], v["verse"]): v["text"]
+        for v in urdu_data["quran"]
+    }
+    print(f"   ✅ Urdu lookup built: {len(urdu_lookup)} verse entries")
 
     combined: list[dict] = []
 
     for surah_idx, arabic_surah in enumerate(arabic_data):
-        urdu_surah    = urdu_data[surah_idx]
         english_surah = english_data[surah_idx]
 
         surah_number       = arabic_surah.get("id", surah_idx + 1)
@@ -88,20 +116,18 @@ def combine_data(
         surah_name_english = arabic_surah.get("transliteration", "")
 
         arabic_verses  = arabic_surah.get("verses", [])
-        urdu_verses    = urdu_surah.get("verses", [])
         english_verses = english_surah.get("verses", [])
 
         for ayah_idx, arabic_verse in enumerate(arabic_verses):
             ayah_number  = arabic_verse.get("id", ayah_idx + 1)
             arabic_text  = arabic_verse.get("text", "")
 
-            urdu_text    = ""
-            if ayah_idx < len(urdu_verses):
-                urdu_text = urdu_verses[ayah_idx].get("translation", "")
-
             english_text = ""
             if ayah_idx < len(english_verses):
                 english_text = english_verses[ayah_idx].get("translation", "")
+
+            # Look up Urdu text by (surah_number, ayah_number)
+            urdu_text = urdu_lookup.get((surah_number, ayah_number), "")
 
             search_text = (
                 f"Surah {surah_name_english} ({surah_number}), "

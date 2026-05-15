@@ -7,7 +7,7 @@
 ## ✨ Features
 
 - **Semantic Search** — FAISS vector search across all 6,236 Quranic verses
-- **Trilingual** — Arabic text, Urdu translation (Maududi), English translation (Saheeh International)
+- **Trilingual** — Arabic text, Urdu translation (Maulana Fateh Muhammad Jalandhri رحمه الله), English translation (Saheeh International)
 - **RAG Architecture** — Retrieval-Augmented Generation for grounded, citation-backed answers
 - **Bilingual Chat** — Ask in English or Urdu, get answers in the same language
 - **Islamic UI** — Green Islamic theme, Amiri font for Arabic, right-to-left Urdu support
@@ -23,7 +23,8 @@
 | LLM | Groq API — `llama-3.3-70b-versatile` |
 | Embeddings | `sentence-transformers/all-MiniLM-L6-v2` |
 | Vector Store | FAISS-cpu |
-| Data | quran-json CDN (Arabic + Urdu + English) |
+| Data (Arabic + English) | quran-json CDN |
+| Data (Urdu) | fawazahmed0/quran-api (Fateh Muhammad Jalandhri) |
 | Env | python-dotenv |
 
 ---
@@ -136,6 +137,10 @@ quran-ai-chatbot/
 Built by **Ubaid ur Rehman** — Aalim | Qari | AI Developer | Karachi, Pakistan
 
 - [GitHub](https://github.com/Ub207)
+
+**Data credits:**
+- Arabic text & English (Saheeh International): [quran-json](https://github.com/semarketir/quranjson)
+- Urdu (Maulana Fateh Muhammad Jalandhri رحمه الله): [fawazahmed0/quran-api](https://github.com/fawazahmed0/quran-api)
 
 ---
 

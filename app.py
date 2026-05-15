@@ -1,6 +1,7 @@
 """
 app.py — Quran AI Assistant: a RAG-based Streamlit chatbot.
-Answers Quran questions in English or Urdu with Arabic text, Urdu (Maududi),
+Answers Quran questions in English or Urdu with Arabic text,
+Urdu (Maulana Fateh Muhammad Jalandhri, Deobandi),
 and English (Saheeh International) translations powered by Groq Llama 3.3 70B.
 """
 
@@ -199,6 +200,8 @@ def get_ai_response(query: str, context: str, client: Groq) -> str:
         "You are a knowledgeable Quran AI Assistant created by Ubaid ur Rehman, "
         "an Aalim (Islamic Scholar) and AI Developer. "
         "Your role is to help users understand the Quran with accuracy and respect.\n\n"
+        "The Urdu translation used is by Maulana Fateh Muhammad Jalandhri رحمه الله "
+        "(Deobandi school), and the English translation is Saheeh International.\n\n"
         "STRICT RULES:\n"
         "1. Answer ONLY from the provided Quranic context. Never fabricate verses.\n"
         "2. Always cite the Surah name and Ayah number for each verse you reference.\n"
@@ -253,7 +256,7 @@ with st.sidebar:
     st.markdown(
         "- **Arabic**: Original Quranic text\n"
         "- **English**: Saheeh International\n"
-        "- **Urdu**: Maulana Maududi"
+        "- **Urdu**: Maulana Fateh Muhammad Jalandhri رحمه الله"
     )
     st.divider()
 
