@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem *)",
+      "PowerShell(Set-Location \"C:\\\\Users\\\\Hp\\\\quran-ai-chatbot\"; $env:PYTHONIOENCODING=\"utf-8\"; .\\\\venv\\\\Scripts\\\\python.exe prepare_data.py 2>&1)",
+      "PowerShell(Set-Location \"C:\\\\Users\\\\Hp\\\\quran-ai-chatbot\"; $env:PYTHONIOENCODING=\"utf-8\"; Start-Process -FilePath \".\\\\venv\\\\Scripts\\\\streamlit.exe\" -ArgumentList \"run app.py --server.headless true\" -NoNewWindow -PassThru | Select-Object Id, ProcessName)",
+      "PowerShell(Set-Location \"C:\\\\Users\\\\Hp\\\\quran-ai-chatbot\"; Start-Job -ScriptBlock { Set-Location \"C:\\\\Users\\\\Hp\\\\quran-ai-chatbot\"; $env:PYTHONIOENCODING=\"utf-8\"; .\\\\venv\\\\Scripts\\\\streamlit.exe run app.py --server.headless true 2>&1 } | Select-Object Id, State, Name)",
+      "PowerShell(Set-Location \"C:\\\\Users\\\\Hp\\\\quran-ai-chatbot\"; $env:PYTHONIOENCODING=\"utf-8\"; .\\\\venv\\\\Scripts\\\\python.exe verify.py 2>&1)",
+      "PowerShell(Set-Location \"C:\\\\Users\\\\Hp\\\\quran-ai-chatbot\"; $env:PYTHONIOENCODING=\"utf-8\"; .\\\\venv\\\\Scripts\\\\python.exe -c \"import app\" 2>&1 | Select-Object -First 10)",
+      "PowerShell(Set-Location \"C:\\\\Users\\\\Hp\\\\quran-ai-chatbot\"; $env:PYTHONIOENCODING=\"utf-8\"; .\\\\venv\\\\Scripts\\\\python.exe -m py_compile app.py prepare_data.py 2>&1)",
+      "PowerShell(Receive-Job *)"
+    ]
+  }
+}
