@@ -1,0 +1,10 @@
+[server]
+# Use poll-based file watcher instead of the default inotify/watchdog watcher.
+# This prevents Streamlit from deeply introspecting every sub-module of large
+# libraries like `transformers`, which triggers hundreds of harmless but noisy
+# "ModuleNotFoundError: No module named 'torchvision'" warnings.
+fileWatcherType = "none"
+
+[browser]
+# Suppress the "You can now view your Streamlit app" banner in the terminal
+gatherUsageStats = false
