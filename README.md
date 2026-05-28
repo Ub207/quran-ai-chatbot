@@ -1,3 +1,15 @@
+---
+title: Quran AI Assistant
+emoji: 📖
+colorFrom: green
+colorTo: green
+sdk: streamlit
+sdk_version: "1.45.1"
+python_version: "3.10"
+app_file: app.py
+pinned: false
+---
+
 # 📖 Quran AI Assistant
 
 > A production-ready RAG-based chatbot that answers questions about the Holy Quran in English and Urdu, powered by semantic search and Groq's Llama 3.3 70B.
