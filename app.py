@@ -379,18 +379,8 @@ TOPIC_EXPANSIONS: dict[str, list[str]] = {
 
 
 # ── Startup self-check: prove the new code paths loaded ──────────────────────
-# These lines fire exactly once per container start. If you see them in the
-# Space's runtime logs, the new code IS running. If you don't, the container
-# is still the old build.
-print(f"Surah aliases loaded: {len(_ALIAS_TO_SURAH)}")
-print(f"Surah DB entries: {len(SURAH_DB)}")
-print(f"Summary mode enabled")
-print(f"Topic expansion enabled ({len(TOPIC_EXPANSIONS)} topics)")
-print(f"detect_surah_in_query: {detect_surah_in_query.__name__}")
-print(f"retrieve_surah_verses: {retrieve_surah_verses.__name__}")
-print(f"expand_query_for_topic: {expand_query_for_topic.__name__}")
-logger.info("Surah aliases loaded: %d  Surah DB entries: %d", len(_ALIAS_TO_SURAH), len(SURAH_DB))
-logger.info("Summary mode + topic expansion enabled  (%d topics)", len(TOPIC_EXPANSIONS))
+# (Block reserved; the actual print() statements run later, after every function
+# is defined. Search for "APP_VERSION banner" below.)
 
 
 def expand_query_for_topic(text: str) -> str:
@@ -1049,6 +1039,22 @@ if not FAISS_PATH.exists() or not META_PATH.exists():
     )
     logger.error("FAISS index missing — aborting startup.")
     st.stop()
+
+
+# ── APP_VERSION banner (runs once per container start, AFTER all defs) ────────
+# If you see this in the Space's runtime logs, the new code is loaded.
+print("=" * 70)
+print(f"APP_VERSION: {APP_VERSION}")
+print(f"Surah aliases loaded: {len(_ALIAS_TO_SURAH)}")
+print(f"Surah DB entries: {len(SURAH_DB)}")
+print("Summary mode enabled")
+print(f"Topic expansion enabled ({len(TOPIC_EXPANSIONS)} topics)")
+print(f"detect_surah_in_query: {detect_surah_in_query.__name__}")
+print(f"retrieve_surah_verses: {retrieve_surah_verses.__name__}")
+print(f"expand_query_for_topic: {expand_query_for_topic.__name__}")
+print("=" * 70)
+logger.info("APP_VERSION: %s  |  aliases=%d  |  topics=%d",
+            APP_VERSION, len(_ALIAS_TO_SURAH), len(TOPIC_EXPANSIONS))
 
 
 # ── Load resources ────────────────────────────────────────────────────────────
