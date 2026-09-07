@@ -37,10 +37,23 @@ from groq import (
 )
 from sentence_transformers import SentenceTransformer
 
+# ── Version & startup banner ──────────────────────────────────────────────────
+#
+# Bump APP_VERSION every time you change app.py. This makes it trivial to
+# verify in the running container that the latest code is actually deployed:
+#   - It appears in the Streamlit UI (homepage caption)
+#   - It appears in the first 2 lines of every startup log
+APP_VERSION = "2026-09-07-surah-summary-v1"
+print(f"APP VERSION: {APP_VERSION}")
+print(f"Python: {os.sys.version.split()[0]}  Streamlit: {st.__version__}")
+
 # ── Logging ──────────────────────────────────────────────────────────────────
 LOG_FORMAT = "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
 logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"), format=LOG_FORMAT)
 logger = logging.getLogger("quran-ai")
+logger.info("=" * 70)
+logger.info("APP VERSION: %s", APP_VERSION)
+logger.info("=" * 70)
 
 # Load .env from the script directory (not the working directory)
 load_dotenv(dotenv_path=Path(__file__).parent / ".env", override=True)
@@ -363,6 +376,21 @@ TOPIC_EXPANSIONS: dict[str, list[str]] = {
     "haram":     ["haram", "forbidden", "prohibited", "حرام"],
     "riba":      ["riba", "usury", "interest", "ربا", "ربوی"],
 }
+
+
+# ── Startup self-check: prove the new code paths loaded ──────────────────────
+# These lines fire exactly once per container start. If you see them in the
+# Space's runtime logs, the new code IS running. If you don't, the container
+# is still the old build.
+print(f"Surah aliases loaded: {len(_ALIAS_TO_SURAH)}")
+print(f"Surah DB entries: {len(SURAH_DB)}")
+print(f"Summary mode enabled")
+print(f"Topic expansion enabled ({len(TOPIC_EXPANSIONS)} topics)")
+print(f"detect_surah_in_query: {detect_surah_in_query.__name__}")
+print(f"retrieve_surah_verses: {retrieve_surah_verses.__name__}")
+print(f"expand_query_for_topic: {expand_query_for_topic.__name__}")
+logger.info("Surah aliases loaded: %d  Surah DB entries: %d", len(_ALIAS_TO_SURAH), len(SURAH_DB))
+logger.info("Summary mode + topic expansion enabled  (%d topics)", len(TOPIC_EXPANSIONS))
 
 
 def expand_query_for_topic(text: str) -> str:
@@ -990,6 +1018,9 @@ with st.sidebar:
         "- [Portfolio](https://github.com/Ub207)"
     )
 
+    st.divider()
+    st.caption(f"**App version:** `{APP_VERSION}`")
+
 
 # ── Guard: API key ────────────────────────────────────────────────────────────
 
@@ -1061,6 +1092,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 st.caption(f"Connected to Groq · live model: `{live_model}` · {len(meta):,} verses indexed")
+st.caption(f"App version: `{APP_VERSION}` · {len(SURAH_DB)} surahs · {len(TOPIC_EXPANSIONS)} topic expansions loaded")
 st.divider()
 
 # ── Session state ─────────────────────────────────────────────────────────────
