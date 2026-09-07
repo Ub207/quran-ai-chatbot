@@ -378,9 +378,7 @@ TOPIC_EXPANSIONS: dict[str, list[str]] = {
 }
 
 
-# ── Startup self-check: prove the new code paths loaded ──────────────────────
-# (Block reserved; the actual print() statements run later, after every function
-# is defined. Search for "APP_VERSION banner" below.)
+# (Startup banner is at the bottom of the file, after all defs.)
 
 
 def expand_query_for_topic(text: str) -> str:
@@ -1043,18 +1041,33 @@ if not FAISS_PATH.exists() or not META_PATH.exists():
 
 # ── APP_VERSION banner (runs once per container start, AFTER all defs) ────────
 # If you see this in the Space's runtime logs, the new code is loaded.
-print("=" * 70)
-print(f"APP_VERSION: {APP_VERSION}")
-print(f"Surah aliases loaded: {len(_ALIAS_TO_SURAH)}")
-print(f"Surah DB entries: {len(SURAH_DB)}")
-print("Summary mode enabled")
-print(f"Topic expansion enabled ({len(TOPIC_EXPANSIONS)} topics)")
-print(f"detect_surah_in_query: {detect_surah_in_query.__name__}")
-print(f"retrieve_surah_verses: {retrieve_surah_verses.__name__}")
-print(f"expand_query_for_topic: {expand_query_for_topic.__name__}")
-print("=" * 70)
-logger.info("APP_VERSION: %s  |  aliases=%d  |  topics=%d",
-            APP_VERSION, len(_ALIAS_TO_SURAH), len(TOPIC_EXPANSIONS))
+# Wrapped in try/except so a missing symbol can never crash the app at import.
+def _safe_fn_name(fn):
+    try:
+        return fn.__name__
+    except Exception:
+        return "<undefined>"
+
+try:
+    print("=" * 70)
+    print(f"APP_VERSION: {APP_VERSION}")
+    print(f"Surah aliases loaded: {len(_ALIAS_TO_SURAH)}")
+    print(f"Surah DB entries: {len(SURAH_DB)}")
+    print("Summary mode enabled")
+    print(f"Topic expansion enabled ({len(TOPIC_EXPANSIONS)} topics)")
+    print(f"detect_surah_in_query: {_safe_fn_name(detect_surah_in_query)}")
+    print(f"retrieve_surah_verses: {_safe_fn_name(retrieve_surah_verses)}")
+    print(f"expand_query_for_topic: {_safe_fn_name(expand_query_for_topic)}")
+    print("=" * 70)
+    logger.info("APP_VERSION: %s  |  aliases=%d  |  topics=%d",
+                APP_VERSION, len(_ALIAS_TO_SURAH), len(TOPIC_EXPANSIONS))
+except Exception as _banner_exc:
+    # If even the banner fails, log it but DON'T crash — the app should still boot.
+    print(f"[WARN] startup banner error: {_banner_exc!r}")
+    try:
+        logger.exception("Startup banner error (non-fatal)")
+    except Exception:
+        pass
 
 
 # ── Load resources ────────────────────────────────────────────────────────────
