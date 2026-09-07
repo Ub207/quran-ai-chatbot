@@ -2,3 +2,9 @@
 venv/
 __pycache__/
 *.pyc
+
+# FAISS index and Quran data are built inside the Docker image (Dockerfile
+# runs `python prepare_data.py` at build time). Keeping them out of git
+# avoids Hugging Face's Xet/LFS binary-file rejection on push.
+faiss_index/
+quran_data/

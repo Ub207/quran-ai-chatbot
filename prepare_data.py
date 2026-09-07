@@ -8,14 +8,15 @@ Data sources:
   Urdu    — fawazahmed0/quran-api (Maulana Fateh Muhammad Jalandhri, Deobandi)
 """
 
-import os
-import sys
 import json
+import os
 import pickle
+import sys
 import time
+from pathlib import Path
+
 import requests
 import numpy as np
-from pathlib import Path
 from sentence_transformers import SentenceTransformer
 
 # Force UTF-8 output so emoji prints correctly on Windows
@@ -38,7 +39,7 @@ COMBINED_PATH = DATA_DIR / "quran_combined.json"
 FAISS_PATH    = INDEX_DIR / "index.faiss"
 META_PATH     = INDEX_DIR / "metadata.pkl"
 
-EMBED_MODEL = "all-MiniLM-L6-v2"
+EMBED_MODEL = os.environ.get("EMBED_MODEL", "all-MiniLM-L6-v2")
 BATCH_SIZE  = 256
 
 
@@ -60,7 +61,7 @@ def fetch_json(url: str, retries: int = 3, delay: float = 2.0) -> dict | list:
     raise RuntimeError(f"Failed to download {url} after {retries} attempts.")
 
 
-# ── Step 1: Download ──────────────────────────────────────────────────────────
+# ── Step 1: Download ─────────────────────────────────────────────────────────
 
 def download_data() -> tuple[list, dict, list]:
     """Download Arabic (list), Urdu (dict, fawazahmed0 format), and English (list)."""
